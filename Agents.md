@@ -7,7 +7,6 @@ A dot net application that serves client applications via REST endpoints. Users 
 - .NET 9.0.305 up to next minor
 - dotnet sdk matching the version specified above
 - `Aspire` orchestration (manifest: 8.2.2/8.0.100 source: SDK 9.0.300)
-- Docker used for local testing
 - `Scalar` documentation
 - Web API name: QuestionnaireService
 - App host name: QuestionnaireHost
@@ -27,6 +26,8 @@ A dot net application that serves client applications via REST endpoints. Users 
 - Only make or change one endpoint at a time
 - Separate out infrastructure changes in their own workstream
 - Never delete files before user confirmation
+- Present test results as `🔴 failure` for failure, `🟢 success` for success and `⚙️ testing` for running
+- If you cannot run tests automatically, ask the user to run manually, provide instructions and ask to copy / paste logs of the results
 
 ## Requirements folder structure
 
