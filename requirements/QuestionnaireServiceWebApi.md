@@ -6,7 +6,6 @@ Create the initial QuestionnaireService web API that mobile and other clients ca
 
 - Expose a REST API named QuestionnaireService that mobile and other HTTP clients can reach anonymously.
 - Provide a `GET /status` endpoint that reports the service name, environment, and version so clients can confirm connectivity.
-- Provide only the `GET /status` endpoint until questionnaire retrieval is ready for implementation.
 - Provide a health check surfaced at `GET /healthz` so hosting infrastructure and containers can verify liveness.
 - Host Scalar API documentation at `/scalar` and ensure the documented endpoints above are visible.
 - Make the service discoverable from the QuestionnaireHost Aspire application.
