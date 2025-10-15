@@ -1,0 +1,6 @@
+@QuestionnaireService_HostAddress = http://localhost:0
+
+GET {{QuestionnaireService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
