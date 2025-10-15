@@ -8,6 +8,7 @@ A small .NET project exploring programmatic workflows with CODEX, formal develop
 - Define and follow formal development steps: requirements → design → implementation → tests → review.
 - Constrain the coding agent to follow the steps and, possibly, validate each step with the user before proceeding to the next step.
 - Evaluate Aspire for orchestration.
+- Provide a back end for generic JSON payloads representing a health questionnaire
 
 ## Development workflow
 
