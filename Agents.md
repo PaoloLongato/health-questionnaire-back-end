@@ -8,6 +8,7 @@ A dot net application that serves client applications via REST endpoints. Users 
 - dotnet sdk matching the version specified above
 - `Aspire` orchestration (manifest: 8.2.2/8.0.100 source: SDK 9.0.300)
 - `Scalar` documentation
+- `PostgreSQL` via `Entity Framework`
 - Web API name: QuestionnaireService
 - App host name: QuestionnaireHost
 
@@ -50,6 +51,7 @@ Describe
 Describe what it needs to achieve
 
 ## Technical requirements
+
 Describe how it needs to achieve the what
 
 ## Test scenarios
