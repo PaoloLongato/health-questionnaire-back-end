@@ -24,10 +24,12 @@ General rules and workflow are contained in `AGENTS.md`. Although generally the 
 
 Mitigants:
 
-- Keep the scope of your work small.
-- Remind the agent that it should respect manual input checkpoints.
+- Keep the scope of your work small and accept that the agent will work on the entire vertical slice
+- In alternative: before you start working, remind the agent that it should respect manual input checkpoints.
+- In alternative: ask targeted questions to the agent (see example below).
+- Example: start with the documentation, ask to add an interface and a mock class, ask to write the tests.
 
-Known inssues:
+### Known inssues with CODEX
 
 - CODEX does not seem able to run tests, it encounters a time out. Manual run gives no issue.
 
