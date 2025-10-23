@@ -1,19 +1,32 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using QuestionnaireService.Data;
 using QuestionnaireService.Questionnaires;
 using QuestionnaireService.Status;
 
 namespace QuestionnaireService.UnitTests.Integration;
 
-public sealed class QuestionnaireApiTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class QuestionnaireApiTests : IClassFixture<PostgresWebApplicationFactory>
 {
+    private readonly PostgresWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
-    public QuestionnaireApiTests(WebApplicationFactory<Program> factory)
+    public QuestionnaireApiTests(PostgresWebApplicationFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
+    }
+
+    [Fact]
+    public void DbContext_UsesNpgsqlProvider()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<QuestionnaireDbContext>();
+
+        Assert.Equal("Npgsql.EntityFrameworkCore.PostgreSQL", dbContext.Database.ProviderName);
     }
 
     [Fact]
@@ -31,8 +44,16 @@ public sealed class QuestionnaireApiTests : IClassFixture<WebApplicationFactory<
     public async Task HealthEndpoint_ReturnsHealthy()
     {
         var response = await _client.GetAsync("/healthz");
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Healthy", payload.GetProperty("status").GetString());
+
+        var entries = payload.GetProperty("entries");
+        Assert.True(entries.TryGetProperty("postgresql", out var dbEntry));
+        Assert.Equal("Healthy", dbEntry.GetProperty("status").GetString());
     }
 
     [Fact]

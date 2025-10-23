@@ -1,5 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.QuestionnaireService>("questionnaire-service");
+var postgres = builder
+    .AddPostgres("questionnaire-db")
+    .AddDatabase("QuestionnaireDb");
+
+var service = builder
+    .AddProject<Projects.QuestionnaireService>("questionnaire-service")
+    .WithReference(postgres);
 
 builder.Build().Run();
