@@ -78,6 +78,8 @@ Describe the test to be performed
 
 ## Testing Requirements
 
+Tests live in their own `QuestionnaireService.UnitTests.csproj`
+
 ### Integration testing strategy
 
 - Each new endpoint must be tested in a local container
