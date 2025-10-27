@@ -15,20 +15,25 @@ A dot net application that serves client applications via REST endpoints. Users 
 
 ## Coding process
 
-- Requirements are set before coding. No requirements, no coding
-- Pause for user feedback
-- Test scenarios are set before coding. No test scenarios, no coding
-- Pause for user feedback
-- Make or modify a class at a time
-- Pause for user feedback at each class
-- Make and / or run unit tests
-- Propose modifications and pause for user feedback
-- If the class impacts existing endpoints: run integration tests
-- A new endpoint requires integration test run only after it's been wired up to the rest of the project
-- Only make or change one endpoint at a time
-- Separate out infrastructure changes in their own workstream
+### Coding steps in order of execution
+
+BDD → ATDD → TDD → Red → Green → Refactor
+
+1 - Requirements are set
+2 - Test scenarios are set after requirements are set
+3 - Testing code is written after test scenarios are set
+4 - Write or refactor code, one class at a time
+5 - Run tests
+6 - If tests don't pass, go to 4
+
+### Strict rules
+
+- Between each of the coding steps, pause and wait for user feedback
+- Initial tests are written using dummy implementation and extensive comments
+- After modifying or adding a class, pause, explain why and wait for user feedback
 - Never delete files before user confirmation
-- Present test results as `🔴 failure` for failure, `🟢 success` for success and `⚙️ testing` for running
+- Run all tests using `dotnet test` and present `⚙️ testing`
+- Present test results as `🔴 failure` for failure, `🟢 success` for success
 - If you cannot run tests automatically, ask the user to run manually, provide instructions and ask to copy / paste logs of the results
 
 ## Requirements folder structure
@@ -80,6 +85,7 @@ Describe the test to be performed
 
 ### Unit testing strategy
 
+- Mocks should be used, so that the user can run tests during coding
 - Each class must be unit tested
 - Each method must be unit tested
 - Happy path and corner cases must be covered
