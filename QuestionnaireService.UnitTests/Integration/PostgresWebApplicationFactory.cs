@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using QuestionnaireService.Data;
 using Testcontainers.PostgreSql;
 
 namespace QuestionnaireService.UnitTests.Integration;
@@ -26,7 +29,13 @@ public sealed class PostgresWebApplicationFactory : WebApplicationFactory<Progra
 
         Environment.SetEnvironmentVariable("ConnectionStrings__QuestionnaireDb", ConnectionString);
 
-        return base.CreateHost(builder);
+        var host = base.CreateHost(builder);
+
+        using var scope = host.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<QuestionnaireDbContext>();
+        db.Database.Migrate();
+
+        return host;
     }
 
     public override async ValueTask DisposeAsync()
