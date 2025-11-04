@@ -3,12 +3,14 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using QuestionnaireService.Admin;
 using QuestionnaireService.Data;
 
 namespace QuestionnaireService.UnitTests.Integration;
 
+[Collection("IntegrationTests")]
 public sealed class AdminQuestionnaireApiTests : IClassFixture<PostgresWebApplicationFactory>
 {
     private readonly PostgresWebApplicationFactory _factory;
@@ -98,18 +100,7 @@ public sealed class AdminQuestionnaireApiTests : IClassFixture<PostgresWebApplic
     [Fact]
     public async Task UpdateQuestionnaire_ReplacesStoredData()
     {
-        var createPayload = new QuestionnaireWriteRequest
-        {
-            Title = "Initial",
-            Content = JsonDocument.Parse("""{"version":1}""").RootElement.Clone()
-        };
-
-        var createResponse = await _client.PostAsJsonAsync("/admin/questionnaires", createPayload);
-        var createBody = await createResponse.Content.ReadAsStringAsync();
-        var created = JsonSerializer.Deserialize<QuestionnaireResponse>(createBody, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        })!;
+        var created = await CreateQuestionnaireAsync("Initial", "{}");
 
         var updatePayload = new QuestionnaireWriteRequest
         {
@@ -165,5 +156,48 @@ public sealed class AdminQuestionnaireApiTests : IClassFixture<PostgresWebApplic
         }
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteQuestionnaire_SoftDeletesAndIsIdempotent()
+    {
+        var created = await CreateQuestionnaireAsync("Delete me", "{\"version\":1}");
+
+        var deleteResponse = await _client.DeleteAsync($"/admin/questionnaires/{created.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<QuestionnaireDbContext>();
+            var deleted = await dbContext.Questionnaires
+                .IgnoreQueryFilters()
+                .SingleAsync(q => q.Id == created.Id);
+
+            Assert.True(deleted.IsDeleted);
+
+            var visible = await dbContext.Questionnaires.FirstOrDefaultAsync(q => q.Id == created.Id);
+            Assert.Null(visible);
+        }
+
+        var secondDelete = await _client.DeleteAsync($"/admin/questionnaires/{created.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, secondDelete.StatusCode);
+    }
+
+    private async Task<QuestionnaireResponse> CreateQuestionnaireAsync(string title, string jsonPayload)
+    {
+        var element = JsonSerializer.Deserialize<JsonElement>(jsonPayload);
+        using var payload = JsonContent.Create(new { title, content = element });
+
+        var response = await _client.PostAsync("/admin/questionnaires", payload);
+        var body = await response.Content.ReadAsStringAsync();
+        if (response.StatusCode != HttpStatusCode.Created)
+        {
+            throw new InvalidOperationException($"Create questionnaire failed: {body}");
+        }
+
+        return JsonSerializer.Deserialize<QuestionnaireResponse>(body, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
     }
 }

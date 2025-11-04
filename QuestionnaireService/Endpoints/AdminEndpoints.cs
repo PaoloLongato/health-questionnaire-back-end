@@ -113,5 +113,29 @@ public sealed class AdminEndpoints : IEndpointModule
             .WithName("UpdateQuestionnaire")
             .WithSummary("Update a questionnaire")
             .WithDescription("Replaces an existing questionnaire for administrative users.");
+
+        group.MapDelete("{id:guid}", async Task<IResult> (Guid id, QuestionnaireDbContext dbContext) =>
+            {
+                var questionnaire = await dbContext.Questionnaires
+                    .IgnoreQueryFilters()
+                    .SingleOrDefaultAsync(q => q.Id == id);
+
+                if (questionnaire is null)
+                {
+                    return Results.NoContent();
+                }
+
+                if (!questionnaire.IsDeleted)
+                {
+                    questionnaire.IsDeleted = true;
+                    questionnaire.UpdatedUtc = DateTime.UtcNow;
+                    await dbContext.SaveChangesAsync();
+                }
+
+                return Results.NoContent();
+            })
+            .WithName("DeleteQuestionnaire")
+            .WithSummary("Delete a questionnaire")
+            .WithDescription("Soft deletes a questionnaire; repeated calls are idempotent.");
     }
 }

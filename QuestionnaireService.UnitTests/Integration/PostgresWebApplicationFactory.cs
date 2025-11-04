@@ -1,3 +1,4 @@
+using DotNet.Testcontainers.Builders;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,7 @@ public sealed class PostgresWebApplicationFactory : WebApplicationFactory<Progra
         .WithUsername("postgres")
         .WithPassword("postgres")
         .WithCleanUp(true)
+        .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("pg_isready -U postgres"))
         .Build();
 
     private bool _started;
