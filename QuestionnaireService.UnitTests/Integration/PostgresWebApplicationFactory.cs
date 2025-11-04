@@ -13,6 +13,7 @@ public sealed class PostgresWebApplicationFactory : WebApplicationFactory<Progra
         .WithDatabase("questionnairetests")
         .WithUsername("postgres")
         .WithPassword("postgres")
+        .WithCleanUp(true)
         .Build();
 
     private bool _started;

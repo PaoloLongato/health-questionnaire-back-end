@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace QuestionnaireService.Admin;
 
-public sealed class CreateQuestionnaireRequest
+public sealed class QuestionnaireWriteRequest
 {
     [Required]
     public string? Title { get; set; }
