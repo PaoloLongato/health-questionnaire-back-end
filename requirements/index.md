@@ -7,3 +7,4 @@
 - [Questionnaire persistence](QuestionnairePersistence.md): Describe the schema, soft delete rules, and migrations for storing questionnaires.
 - [Minimal API endpoint architecture](MinimalApiEndpointArchitecture.md): Outline how to modularize endpoint registrations.
 - [Questionnaire by ID endpoint](QuestionnaireByIdEndpoint.md): Define the placeholder retrieval contract and validation rules for `/questionnaires/{id}`.
+- [List questionnaires endpoint](ListQuestionnairesEndpoint.md): Document the public listing endpoint that returns metadata for active questionnaires.
