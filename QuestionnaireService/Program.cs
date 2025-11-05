@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using QuestionnaireService.Data;
 using QuestionnaireService.Endpoints;
-using QuestionnaireService.Questionnaires;
 using QuestionnaireService.Status;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +13,6 @@ builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks()
     .AddNpgSql(connectionString, name: "postgresql");
 builder.Services.AddSingleton<ServiceStatusProvider>();
-builder.Services.AddSingleton<QuestionnairePlaceholderProvider>();
 builder.Services.AddDbContextPool<QuestionnaireDbContext>(options =>
     options.UseNpgsql(connectionString));
 

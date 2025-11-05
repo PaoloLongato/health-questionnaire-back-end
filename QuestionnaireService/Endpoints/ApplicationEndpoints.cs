@@ -1,7 +1,7 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuestionnaireService.Data;
-using QuestionnaireService.Questionnaires;
 using QuestionnaireService.Status;
 
 namespace QuestionnaireService.Endpoints;
@@ -29,26 +29,50 @@ public sealed class ApplicationEndpoints : IEndpointModule
             .WithSummary("Lists available questionnaires with metadata.")
             .Produces<List<QuestionnaireListItem>>();
 
-        app.MapGet("/questionnaires/{id}", (
-            string id,
-            QuestionnairePlaceholderProvider provider) =>
-        {
-            if (!Guid.TryParse(id, out var questionnaireId))
+        app.MapGet("/questionnaires/{id}", async Task<IResult> (string id, QuestionnaireDbContext dbContext) =>
             {
-                return Results.Problem(
-                    title: "Invalid questionnaire identifier",
-                    detail: "The questionnaire ID must be a GUID.",
-                    statusCode: StatusCodes.Status400BadRequest);
-            }
+                if (!Guid.TryParse(id, out var questionnaireId))
+                {
+                    return Results.Problem(
+                        title: "Invalid questionnaire identifier",
+                        detail: "The questionnaire ID must be a GUID.",
+                        statusCode: StatusCodes.Status400BadRequest);
+                }
 
-            var placeholder = provider.GetPlaceholder(questionnaireId);
-            return Results.Ok(placeholder);
-        })
+                var questionnaire = await dbContext.Questionnaires
+                    .FirstOrDefaultAsync(q => q.Id == questionnaireId);
+
+                if (questionnaire is null)
+                {
+                    return Results.NotFound();
+                }
+
+                var response = new QuestionnaireDetailsResponse(
+                    questionnaire.Id,
+                    questionnaire.Title,
+                    questionnaire.Description,
+                    questionnaire.CreatedUtc,
+                    questionnaire.UpdatedUtc,
+                    questionnaire.UpdatedBy,
+                    questionnaire.Content.RootElement.Clone());
+
+                return Results.Ok(response);
+            })
         .WithName("GetQuestionnaireById")
-        .WithSummary("Returns a placeholder questionnaire for the given identifier.")
-        .Produces<QuestionnaireDetails>()
-        .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+        .WithSummary("Returns a questionnaire for the given identifier.")
+        .Produces<QuestionnaireDetailsResponse>()
+        .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status404NotFound);
     }
 
     public sealed record QuestionnaireListItem(Guid Id, string Title, string? Description, DateTime UpdatedUtc, string? UpdatedBy);
+
+    public sealed record QuestionnaireDetailsResponse(
+        Guid Id,
+        string Title,
+        string? Description,
+        DateTime CreatedUtc,
+        DateTime UpdatedUtc,
+        string? UpdatedBy,
+        JsonElement Content);
 }
